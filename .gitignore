@@ -1,0 +1,5 @@
+PaddleOCR/inference/
+PaddleOCR/train_data/
+*.pdiparams
+*.pdmodel
+*.tar
