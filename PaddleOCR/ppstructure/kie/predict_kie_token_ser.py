@@ -97,10 +97,25 @@ class SerPredictor(object):
         self.postprocess_op = build_post_process(postprocess_params)
         self.predictor, self.input_tensor, self.output_tensors, self.config = \
             utility.create_predictor(args, 'ser', logger)
+        self.ocr_info_path = getattr(args, "ocr_info_path", None)
+        self.ocr_info_dir = getattr(args, "ocr_info_dir", None)
 
-    def __call__(self, img):
+    def __call__(self, img,image_file=None, ocr_info_path=None):
         ori_im = img.copy()
         data = {'image': img}
+        
+        final_ocr_info_path = ocr_info_path or self.ocr_info_path
+
+        if final_ocr_info_path is None and self.ocr_info_dir and image_file:
+            image_stem = os.path.splitext(os.path.basename(image_file))[0]
+            final_ocr_info_path = os.path.join(
+                self.ocr_info_dir,
+                image_stem + "_ocr_info.json"
+            )
+
+        if final_ocr_info_path:
+            data["ocr_info_path"] = final_ocr_info_path
+            
         data = transform(data, self.preprocess_op)
         if data[0] is None:
             return None, 0
@@ -147,7 +162,14 @@ def main(args):
             if img is None:
                 logger.info("error in loading image:{}".format(image_file))
                 continue
-            ser_res, _, elapse = ser_predictor(img)
+            # ser_res, _, elapse = ser_predictor(img)
+            # 作用：
+            # 不传 ocr_info_path / ocr_info_dir 时，原逻辑不变；
+            # 传了以后，SER 使用 MinerU OCR JSON；
+            # 仍然使用部署模型：
+            # inference.pdmodel
+            # inference.pdiparams
+            ser_res, _, elapse = ser_predictor(img, image_file=image_file)
             ser_res = ser_res[0]
 
             res_str = '{}\t{}\n'.format(

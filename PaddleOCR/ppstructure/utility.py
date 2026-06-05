@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from html import parser
 import random
 import ast
 import PIL
@@ -55,6 +56,23 @@ def init_args():
     parser.add_argument("--ser_model_dir", type=str)
     parser.add_argument("--re_model_dir", type=str)
     parser.add_argument("--use_visual_backbone", type=str2bool, default=True)
+    
+    # ppstructure/utility.py增加命令行参数 --ocr_info_path / --ocr_info_dir
+    parser.add_argument(
+    "--ocr_info_path",
+    type=str,
+    default=None,
+    help="External OCR info json path for KIE. If set, use this file instead of PaddleOCR OCR."
+    )
+
+    parser.add_argument(
+        "--ocr_info_dir",
+        type=str,
+        default=None,
+        help="External OCR info json directory for KIE. The file name is inferred as image_stem + '_ocr_info.json'."
+    )
+    
+    
     parser.add_argument(
         "--ser_dict_path",
         type=str,
