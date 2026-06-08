@@ -49,9 +49,14 @@ class SerRePredictor(object):
         else:
             self.predictor = None
 
-    def __call__(self, img):
+    def __call__(self, img, image_file=None, ocr_info_path=None):
         starttime = time.time()
-        ser_results, ser_inputs, ser_elapse = self.ser_engine(img)
+        # ser_results, ser_inputs, ser_elapse = self.ser_engine(img)
+        ser_results, ser_inputs, ser_elapse = self.ser_engine(
+            img,
+            image_file=image_file,
+            ocr_info_path=ocr_info_path,
+        )
         if self.predictor is None:
             return ser_results, ser_elapse
 
@@ -98,7 +103,13 @@ def main(args):
             if img is None:
                 logger.info("error in loading image:{}".format(image_file))
                 continue
-            re_res, elapse = ser_re_predictor(img)
+            # re_res, elapse = ser_re_predictor(img)
+            
+            # SER+RE 部署入口也能透传 MinerU OCR；
+            # predict_kie_token_ser_re.py 可以直接跑你现有的：
+            # --ser_model_dir=..\inference\ser_vi_layoutxlm_xfund_infer
+            # --re_model_dir=..\inference\re_vi_layoutxlm_xfund_infer
+            re_res, elapse = ser_re_predictor(img, image_file=image_file)
             re_res = re_res[0]
 
             res_str = '{}\t{}\n'.format(
